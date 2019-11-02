@@ -22,5 +22,6 @@ int main(int argc, char *argv[])
 	GameLogic main(col,row,p, mode, order);//col,row,p,g,mode,debug
 	main.Run();
 
+	cin.get();
 	return 0;
 }
