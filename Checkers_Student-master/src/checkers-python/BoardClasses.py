@@ -24,7 +24,7 @@ class Board:
     This class describes Board
     """
     opponent = {"W": "B", "B": "W"}
-    def __init__(self, row, col, p):
+    def __init__(self, col,row, p):
         """
         Intializes board: 
             M = number of rows
@@ -145,13 +145,13 @@ class Board:
                         self.white_count -= 1
                     else:
                         self.black_count -= 1
-                if (turn == 'B' and target[0] == self.row - 1):
+                if (turn == 'B' and target[0] == self.row - 1):# and not self.board[target[0]][target[1]].is_king):
                     if not is_start_checker_king:
                         temp_saved_move[2] = True
                     self.board[target[0]][target[1]].become_king()
                     #self.saved_move[2] = True
 
-                elif (turn == 'W' and target[0] == 0):
+                elif (turn == 'W' and target[0] == 0):# and not self.board[target[0]][target[1]].is_king):
                     if not is_start_checker_king:
                         temp_saved_move[2] = True
                     self.board[target[0]][target[1]].become_king()
@@ -357,6 +357,24 @@ class Board:
         elif self.col * self.p % 2 != 0:
             raise InvalidParameterError("N*P is odd -- must be even")
 
+    def check_initial_variable(self):
+        """
+        Checks the integrity of the initial board variables provided (M,N,P,Q)
+        @param :
+        @param :
+        @return :
+        @raise InvalidParameterError: raises this exception if there is a problem with the provided variables
+        """
+        # Q > 0
+        if self.row - 2 * self.p <= 0:
+            raise  InvalidParameterError("Q <= 0")
+        # M = 2P + Q
+        elif self.row != 2 * self.p + (self.row - 2 * self.p):
+            raise InvalidParameterError("M != 2P + Q")
+        # N*P is even
+        elif self.col * self.p % 2 != 0:
+            raise InvalidParameterError("N*P is odd -- must be even")
+
     def undo(self):
         if self.saved_move != []:
             temp_saved_move = self.saved_move[-1]
@@ -378,14 +396,18 @@ class Board:
                 x,y,c,k = saved_enemy
                 self.board[x][y].color = c
                 self.board[x][y].is_king = k
-                if c == "W":
-                    self.white_count += 1
-                if c == "B":
-                    self.black_count += 1
-
+            self.tie_counter -= 1
             self.saved_move.pop(-1)
         else:
             raise Exception("Cannot undo operation")
+        self.black_count = 0
+        self.white_count = 0
+        for i in range(self.row):
+            for j in range(self.col):
+                if self.board[i][j].color=="W":
+                    self.white_count += 1
+                elif self.board[i][j].color == "B":
+                    self.black_count += 1
 
 
 
@@ -396,16 +418,28 @@ class Board:
 if __name__ == "__main__":
 
 
-    b=Board(4,4,1)
-    b.initialize_game()
-    b.show_board()
+    b=Board(7,7,2)
+    b.board[1][3] = Checker.Checker("W", [1, 3])
 
-    b.make_move(b.get_all_possible_moves(1)[1][0],1)
-    b.make_move(b.get_all_possible_moves(1)[1][0], 1)
-    b.make_move(b.get_all_possible_moves(2)[1][0], 2)
-    b.show_board()
 
-    print(b.black_count)
+    b.show_board()
+    m = b.get_all_possible_moves("W")[0][0]
+    b.make_move(m,"W")
+    b.show_board()
+    m = b.get_all_possible_moves("W")[0][0]
+    b.make_move(m,"W")
+    b.show_board()
+    m = b.get_all_possible_moves("W")[0][0]
+    b.make_move(m,"W")
+    b.show_board()
+    print("Undo")
     b.undo()
     b.show_board()
-    print(b.black_count)
+    print("Undo")
+    b.undo()
+    b.show_board()
+    print("Undo")
+    b.undo()
+    b.show_board()
+
+
