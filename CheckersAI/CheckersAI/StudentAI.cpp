@@ -20,10 +20,10 @@ Move StudentAI::GetMove(Move move)
 	if (move.seq.empty())
     {
         player = 1;
-		cout << "\nI am player one\n";
+		//cout << "\nI am player one\n";
     } else {
         board.makeMove(move,player == 1?2:1);
-		cout << "\nI am player " << player << "\n";
+		//cout << "\nI am player " << player << "\n";
     }
 
 	vector<vector<Move> > moves = board.getAllPossibleMoves(player);
@@ -43,9 +43,9 @@ Move StudentAI::GetMove(Move move)
 	if (moves.size() == 1 && moves[0].size() == 1)
 	{
 		board.makeMove(bestMove, player);
-		auto move_finish = chrono::high_resolution_clock::now();
-		elapsed = move_finish - move_start;
-		std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+		//auto move_finish = chrono::high_resolution_clock::now();
+		//elapsed = move_finish - move_start;
+		//std::cout << "Elapsed time: " << elapsed.count() << " s\n";
 		return bestMove;
 	}
 	depth = 0;
@@ -57,9 +57,9 @@ Move StudentAI::GetMove(Move move)
 		max_depth++;
 	}
 	board.makeMove(bestMove, player);
-	auto move_finish = chrono::high_resolution_clock::now();
-	elapsed = move_finish - move_start;
-	std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+	//auto move_finish = chrono::high_resolution_clock::now();
+	//elapsed = move_finish - move_start;
+	//std::cout << "Elapsed time: " << elapsed.count() << " s\n";
 	return bestMove;
 
 
@@ -93,7 +93,7 @@ int StudentAI::searchMin(int a)
 	{
 		return MIN;
 	}
-	if (board.isWin(player) != 0)
+	else if (board.isWin(player) != 0)
 	{
 		return MAX;
 	}
@@ -141,11 +141,11 @@ int StudentAI::searchMax(int b)
 	int alpha = MIN;
 	int beta = b;
 	vector<vector<Move> > moves = board.getAllPossibleMoves(player);
-	if (player == board.isWin(player))
+	if (player == board.isWin(player) || board.isWin(player) == -1)
 	{
 		return MAX;
 	}
-	if (board.isWin(player) != 0)
+	else if (board.isWin(player) != 0)
 	{
 		return MIN;
 	}
