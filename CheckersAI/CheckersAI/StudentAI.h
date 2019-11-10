@@ -2,6 +2,8 @@
 #define STUDENTAI_H
 #include "AI.h"
 #include "Board.h"
+#include <random>
+#include <chrono>
 #pragma once
 
 //The following part should be completed by students.
@@ -11,7 +13,10 @@ class StudentAI :public AI
 private: 
 	int depth;
 	int max_depth;
+	bool stop;
 	Move bestMove;
+	chrono::steady_clock::time_point move_start;
+	chrono::steady_clock::time_point game_start;
 	
 public:
     Board board;
