@@ -25,6 +25,7 @@ Move StudentAI::GetMove(Move move)
         board.makeMove(move,player == 1?2:1);
 		cout << "\nI am player " << player << "\n";
     }
+
 	vector<vector<Move> > moves = board.getAllPossibleMoves(player);
 	auto current_time = chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed = current_time - game_start;
@@ -38,14 +39,21 @@ Move StudentAI::GetMove(Move move)
 		board.makeMove(res,player);
 		return res;
 	}
-
 	bestMove = moves[0][0];
+	if (moves.size() == 1 && moves[0].size() == 1)
+	{
+		board.makeMove(bestMove, player);
+		auto move_finish = chrono::high_resolution_clock::now();
+		elapsed = move_finish - move_start;
+		std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+		return bestMove;
+	}
 	depth = 0;
 	max_depth = 0;
 	stop = false;
 	while (!stop)
 	{
-		searchMax(INT_MAX);
+		searchMax(MAX);
 		max_depth++;
 	}
 	board.makeMove(bestMove, player);
@@ -79,8 +87,16 @@ int StudentAI::searchMin(int a)
 		return 0;
 	}
 	int alpha = a;
-	int beta = INT_MAX;
+	int beta = MAX;
 	vector<vector<Move> > moves = board.getAllPossibleMoves(player);
+	if (player == board.isWin(player))
+	{
+		return MIN;
+	}
+	if (board.isWin(player) != 0)
+	{
+		return MAX;
+	}
 	for (int i = 0; i < moves.size(); ++i)
 	{
 		for (int j = 0; j < moves[i].size(); ++j)
@@ -122,9 +138,17 @@ int StudentAI::searchMax(int b)
 		stop = true;
 		return 0;
 	}
-	int alpha = INT_MIN;
+	int alpha = MIN;
 	int beta = b;
 	vector<vector<Move> > moves = board.getAllPossibleMoves(player);
+	if (player == board.isWin(player))
+	{
+		return MAX;
+	}
+	if (board.isWin(player) != 0)
+	{
+		return MIN;
+	}
 	Move newBest = moves[0][0];
 	for (int i = 0; i < moves.size(); ++i)
 	{

@@ -11,6 +11,9 @@
 class StudentAI :public AI
 {
 private: 
+	const int MAX = 20000;		 
+	const int MIN = -20000;
+
 	int depth;
 	int max_depth;
 	bool stop;

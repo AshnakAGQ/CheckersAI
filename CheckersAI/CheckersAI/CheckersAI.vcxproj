@@ -25,6 +25,7 @@
     <ClInclude Include="GameLogic.h" />
     <ClInclude Include="ManualAI.h" />
     <ClInclude Include="Move.h" />
+    <ClInclude Include="RandomAI.h" />
     <ClInclude Include="StudentAI.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
@@ -35,6 +36,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ManualAI.cpp" />
     <ClCompile Include="Move.cpp" />
+    <ClCompile Include="RandomAI.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="StudentAI.cpp" />
     <ClCompile Include="Utils.cpp" />

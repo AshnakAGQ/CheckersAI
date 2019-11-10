@@ -101,6 +101,22 @@ void GameLogic::Run()
 
 		Manual();
 	}
+	else if (mode == "r" or mode == "random")
+	{
+		AI* studentai = new StudentAI(col, row, p);
+		AI* randomai = new RandomAI(col, row, p);
+		if (order == 1)
+		{
+			aiList->push_back(randomai);
+			aiList->push_back(studentai);
+		}
+		else
+		{
+			aiList->push_back(studentai);
+			aiList->push_back(randomai);
+		}
+		Manual();
+	}
 	else if (mode == "t")
 	{
 		TournamentInterface();

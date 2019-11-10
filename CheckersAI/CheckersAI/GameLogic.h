@@ -4,6 +4,7 @@
 #include "Board.h"
 #include "StudentAI.h"
 #include "ManualAI.h"
+#include "RandomAI.h"
 #pragma once
 
 
