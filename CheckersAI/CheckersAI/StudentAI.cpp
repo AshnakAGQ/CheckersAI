@@ -53,7 +53,9 @@ Move StudentAI::GetMove(Move move)
 	stop = false;
 	while (!stop)
 	{
+		cout << "Starting search with depth " << max_depth << "...\n";
 		searchMax(MAX);
+		cout << "Search with depth " << max_depth << " returned " << (stop ? "unsuccessfully with " : "successfully with new ") << "best move: " << bestMove.toString() << "\n";
 		max_depth++;
 	}
 	board.makeMove(bestMove, player);
@@ -78,7 +80,14 @@ Move StudentAI::GetMove(Move move)
 int StudentAI::searchMin(int a)
 {
 	if (depth == max_depth)
-		return (player == 1 ? -1 : 1) * board.whiteCount - board.blackCount;
+	{
+		/*if (depth <= 3) 
+		{
+			cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
+			cout << "Calculated value = " << (player == 1 ? 1 : -1) * (board.whiteCount - board.blackCount) << "\n";
+		}*/
+		return (player == 1 ? 1 : -1) * (board.whiteCount - board.blackCount);
+	}
 	auto move_finish = chrono::high_resolution_clock::now();
 	chrono::duration<double> elapsed = move_finish - move_start;
 	if (elapsed >= chrono::seconds{9})
@@ -107,18 +116,24 @@ int StudentAI::searchMin(int a)
 			int b = searchMax(beta);
 			if (stop)
 			{
+				//cout << "Out of time. Stopping.\n";
 				board.Undo();
 				player = (player == 1 ? 2 : 1);
 				return 0;
 			}
 			if (alpha > b)
 			{
+				//cout << "Depth = " << depth - 1 << ": Alpha (" << alpha << ") > b (" << b << "). Trimming.\n";
 				board.Undo();
 				player = (player == 1 ? 2 : 1);
 				--depth;
 				return b;
 			}
-			else if (b < beta) beta = b;
+			else if (b < beta)
+			{
+				//cout << "Depth = " << depth - 1 << ": b (" << b << ") < Beta (" << beta << "). Updating.\n";
+				beta = b;
+			}
 			board.Undo();
 			player = (player == 1 ? 2 : 1);
 			--depth;
@@ -130,7 +145,14 @@ int StudentAI::searchMin(int a)
 int StudentAI::searchMax(int b)
 {
 	if (depth == max_depth)
-		return (player == 1 ? -1 : 1) * board.whiteCount - board.blackCount;
+	{
+		/*if (depth <= 3)
+		{
+			cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
+			cout << "Calculated value = " << (player == 1 ? -1 : 1) * (board.whiteCount - board.blackCount) << "\n";
+		}*/
+		return (player == 1? -1 : 1) * (board.whiteCount - board.blackCount);
+	}
 	auto move_finish = chrono::high_resolution_clock::now();
 	chrono::duration<double> elapsed = move_finish - move_start;
 	if (elapsed >= chrono::seconds{ 9 })
@@ -160,12 +182,14 @@ int StudentAI::searchMax(int b)
 			int a = searchMin(alpha);
 			if (stop)
 			{
+				//cout << "Out of time. Stopping.\n";
 				board.Undo();
 				player = (player == 1 ? 2 : 1);
 				return 0;
 			}
 			if (a > beta)
 			{
+				//cout << "Depth = " << depth - 1 << ": a (" << a << ") > Beta (" << beta << "). Trimming.\n";
 				board.Undo();
 				player = (player == 1 ? 2 : 1);
 				--depth;
@@ -173,8 +197,14 @@ int StudentAI::searchMax(int b)
 			}
 			else if (a > alpha)
 			{
+				//cout << "Depth = " << depth - 1 << ": a (" << a << ") > Alpha (" << alpha << "). Updating.\n";
 				alpha = a;
-				if (depth == 0) newBest = moves[i][j];
+				if (depth == 1)
+				{
+					cout << "New Best Value: " << a << " | ";
+					cout << "Updating newBest from " << newBest.toString() << " to " << moves[i][j].toString() << "\n";
+					newBest = moves[i][j];
+				}
 			}
 			board.Undo();
 			player = (player == 1 ? 2 : 1);
