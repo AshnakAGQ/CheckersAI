@@ -8,12 +8,47 @@ StudentAI::StudentAI(int col,int row,int p)
     board = Board(col,row,p);
     board.initializeGame();
     player = 2;
-	game_start = chrono::high_resolution_clock::now();
+	time_taken = chrono::seconds{0};
 }
 
+/*
+StudentAI::~StudentAI()
+{
+	cout << "Game Time: " << time_taken.count() << endl;
+	cout << "Average times for each depth level:\n";
+	for (int i = 0; i < 10; ++i)
+	{
+		cout << "Depth " << i << ":\n";
+		cout << "  Occurrances: " << times[i].size() << endl;
+		double avg = 0;
+		double largest =  0;
+		double sd = 0;
+		for (std::list<chrono::duration<double>>::iterator it = times[i].begin(); it != times[i].end(); ++it)
+		{
+			double value = it->count();
+			avg += value;
+			largest = max(largest, value);
+		}
+		avg /= times[i].size();
+		for (std::list<chrono::duration<double>>::iterator it = times[i].begin(); it != times[i].end(); ++it)
+		{
+			double value = it->count();
+			sd += value - avg;
+		}
+		sd /= times[i].size();
+		cout << "  Average: " << (times[i].size() > 0 ? avg: 0) << endl;
+		cout << "  Max: " << (times[i].size() > 0 ? largest : 0) << endl;
+		cout << "  SD: " << (times[i].size() > 0  ? sd : 0) << endl;
+		cin.get(); 
+	}
+
+}
+*/
+
 // 49.11 avg moves in a checkers game
+// 24.56 per color
 // 8 min time limit = 480 seconds
-// ~9.774 second limit per move
+// ~19.54 second limit per move
 Move StudentAI::GetMove(Move move)
 {
 	move_start = chrono::high_resolution_clock::now();
@@ -27,25 +62,24 @@ Move StudentAI::GetMove(Move move)
     }
 
 	vector<vector<Move> > moves = board.getAllPossibleMoves(player);
-	auto current_time = chrono::high_resolution_clock::now();
-	std::chrono::duration<double> elapsed = current_time - game_start;
 
-	if (elapsed > chrono::seconds{470})
+	if (time_taken > chrono::seconds{ GAME_TIME })
 	{
 		int i = rand() % (moves.size());
 		vector<Move> checker_moves = moves[i];
 		int j = rand() % (checker_moves.size());
 		Move res = checker_moves[j];
 		board.makeMove(res,player);
+		auto move_finish = chrono::high_resolution_clock::now();
+		time_taken += move_finish - move_start;
 		return res;
 	}
 	bestMove = moves[0][0];
 	if (moves.size() == 1 && moves[0].size() == 1)
 	{
 		board.makeMove(bestMove, player);
-		//auto move_finish = chrono::high_resolution_clock::now();
-		//elapsed = move_finish - move_start;
-		//std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+		auto move_finish = chrono::high_resolution_clock::now();
+		time_taken += move_finish - move_start;
 		return bestMove;
 	}
 	depth = 0;
@@ -53,13 +87,19 @@ Move StudentAI::GetMove(Move move)
 	stop = false;
 	while (!stop)
 	{
+		//cout << "Starting search with depth " << max_depth << "...\n";
 		searchMax(MAX);
+		//cout << "Search with depth " << max_depth << " returned " << (stop ? "unsuccessfully with " : "successfully with new ") << "best move: " << bestMove.toString() << "\n";
+		/*auto level_finish = chrono::high_resolution_clock::now();
+		if (!stop && max_depth < 10)
+		{
+			times[max_depth].push_back(level_finish - move_start);
+		}*/
 		max_depth++;
 	}
 	board.makeMove(bestMove, player);
-	//auto move_finish = chrono::high_resolution_clock::now();
-	//elapsed = move_finish - move_start;
-	//std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+	auto move_finish = chrono::high_resolution_clock::now();
+	time_taken += move_finish - move_start;
 	return bestMove;
 
 
@@ -78,10 +118,17 @@ Move StudentAI::GetMove(Move move)
 int StudentAI::searchMin(int a)
 {
 	if (depth == max_depth)
-		return (player == 1 ? -1 : 1) * board.whiteCount - board.blackCount;
+	{
+		/*if (depth <= 3) 
+		{
+			cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
+			cout << "Calculated value = " << (player == 1 ? 1 : -1) * (board.whiteCount - board.blackCount) << "\n";
+		}*/
+		return (player == 1 ? -1 : 1) * heuristic();
+	}
 	auto move_finish = chrono::high_resolution_clock::now();
 	chrono::duration<double> elapsed = move_finish - move_start;
-	if (elapsed >= chrono::seconds{9})
+	if (elapsed >= chrono::seconds{ TURN_TIME })
 	{
 		stop = true;
 		return 0;
@@ -89,12 +136,16 @@ int StudentAI::searchMin(int a)
 	int alpha = a;
 	int beta = MAX;
 	vector<vector<Move> > moves = board.getAllPossibleMoves(player);
-	if (player == board.isWin(player))
+	if (player == board.isWin(player == 1 ? 2 : 1))
 	{
+		//cout << "Found loss during searchMin!\n";
+		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MIN;
 	}
-	else if (board.isWin(player) != 0)
+	else if (board.isWin(player == 1 ? 2 : 1) != 0)
 	{
+		//cout << "Found win during searchMin!\n";
+		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MAX;
 	}
 	for (int i = 0; i < moves.size(); ++i)
@@ -107,18 +158,24 @@ int StudentAI::searchMin(int a)
 			int b = searchMax(beta);
 			if (stop)
 			{
+				//cout << "Out of time. Stopping.\n";
 				board.Undo();
 				player = (player == 1 ? 2 : 1);
 				return 0;
 			}
 			if (alpha > b)
 			{
+				//cout << "Depth = " << depth - 1 << ": Alpha (" << alpha << ") > b (" << b << "). Trimming.\n";
 				board.Undo();
 				player = (player == 1 ? 2 : 1);
 				--depth;
 				return b;
 			}
-			else if (b < beta) beta = b;
+			else if (b < beta)
+			{
+				//cout << "Depth = " << depth - 1 << ": b (" << b << ") < Beta (" << beta << "). Updating.\n";
+				beta = b;
+			}
 			board.Undo();
 			player = (player == 1 ? 2 : 1);
 			--depth;
@@ -130,10 +187,17 @@ int StudentAI::searchMin(int a)
 int StudentAI::searchMax(int b)
 {
 	if (depth == max_depth)
-		return (player == 1 ? -1 : 1) * board.whiteCount - board.blackCount;
+	{
+		/*if (depth <= 3)
+		{
+			cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
+			cout << "Calculated value = " << (player == 1 ? -1 : 1) * (board.whiteCount - board.blackCount) << "\n";
+		}*/
+		return (player == 1? 1 : -1) * heuristic();
+	}
 	auto move_finish = chrono::high_resolution_clock::now();
 	chrono::duration<double> elapsed = move_finish - move_start;
-	if (elapsed >= chrono::seconds{ 9 })
+	if (elapsed >= chrono::seconds{ TURN_TIME })
 	{
 		stop = true;
 		return 0;
@@ -141,12 +205,17 @@ int StudentAI::searchMax(int b)
 	int alpha = MIN;
 	int beta = b;
 	vector<vector<Move> > moves = board.getAllPossibleMoves(player);
-	if (player == board.isWin(player) || board.isWin(player) == -1)
+
+	if (player == board.isWin(player == 1 ? 2 : 1) || board.isWin(player == 1 ? 2 : 1) == -1)
 	{
+		//cout << "Found win during searchMax!\n"; 
+		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MAX;
 	}
-	else if (board.isWin(player) != 0)
+	else if (board.isWin(player == 1 ? 2 : 1) != 0)
 	{
+		//cout << "Found loss during searchMax!\n";
+		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MIN;
 	}
 	Move newBest = moves[0][0];
@@ -160,12 +229,14 @@ int StudentAI::searchMax(int b)
 			int a = searchMin(alpha);
 			if (stop)
 			{
+				//cout << "Out of time. Stopping.\n";
 				board.Undo();
 				player = (player == 1 ? 2 : 1);
 				return 0;
 			}
 			if (a > beta)
 			{
+				//cout << "Depth = " << depth - 1 << ": a (" << a << ") > Beta (" << beta << "). Trimming.\n";
 				board.Undo();
 				player = (player == 1 ? 2 : 1);
 				--depth;
@@ -173,8 +244,13 @@ int StudentAI::searchMax(int b)
 			}
 			else if (a > alpha)
 			{
+				//cout << "Depth = " << depth - 1 << ": a (" << a << ") > Alpha (" << alpha << "). Updating.\n";
 				alpha = a;
-				if (depth == 0) newBest = moves[i][j];
+				if (depth == 1)
+				{
+					//cout << "New Best Value: " << a << " | " << "Updating newBest from " << newBest.toString() << " to " << moves[i][j].toString() << "\n";
+					newBest = moves[i][j];
+				}
 			}
 			board.Undo();
 			player = (player == 1 ? 2 : 1);
@@ -183,5 +259,25 @@ int StudentAI::searchMax(int b)
 	}
 	if (depth == 0) bestMove = newBest;	// depth 0 will always return here
 	return alpha;
+}
+
+int StudentAI::heuristic()
+{
+	int value = 0;
+	for (int i = 0; i < board.row; ++i)
+	{
+		for (int j = 0; j < board.col; ++j)
+		{
+			if (board.board[i][j].color == "b")
+				value += 1;
+			else if (board.board[i][j].color == "w")
+				value -= 1;
+			else if (board.board[i][j].color == "B")
+				value += 2;
+			else if (board.board[i][j].color == "W")
+				value -= 2;
+		}
+	}
+	return value;
 }
 

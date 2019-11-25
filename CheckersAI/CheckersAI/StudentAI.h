@@ -4,9 +4,9 @@
 #include "Board.h"
 #include <random>
 #include <chrono>
-#include <list>
-#include <array>
-#include <algorithm>
+//#include <list>
+//#include <array>
+//#include <algorithm>
 #pragma once
 
 //The following part should be completed by students.
@@ -16,26 +16,27 @@ class StudentAI :public AI
 private: 
 	const int MAX = 20000;		 
 	const int MIN = -20000;
-	const int GAME_TIME = 1200;
-	const int TURN_TIME = 60;
+	const int GAME_TIME = 460;
+	const int TURN_TIME = 17;
 
 	int depth;
 	int max_depth;
 	bool stop;
 	Move bestMove;
-	chrono::steady_clock::time_point move_start;
+	chrono::time_point<std::chrono::high_resolution_clock> move_start;
 	chrono::duration<double> time_taken;
 
-	std::array<std::list<chrono::duration<double>>, 20> times;
+	//std::array<std::list<chrono::duration<double>>, 10> times;
 	
 public:
     Board board;
 	StudentAI(int col, int row, int p);
-	~StudentAI();
+	//~StudentAI();
 	virtual Move GetMove(Move board);
 
 	int searchMin(int a);
 	int searchMax(int b);
+	int heuristic();
 };
 
 #endif //STUDENTAI_H
