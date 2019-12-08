@@ -85,18 +85,20 @@ Move StudentAI::GetMove(Move move)
 	depth = 0;
 	max_depth = 0;
 	stop = false;
-	while (!stop)
+
+	auto searchStart = chrono::high_resolution_clock::now();
+	chrono::duration<double> elapsedTime;
+	chrono::duration<double> lastSearchTime;
+	do 
 	{
+		searchStart = chrono::high_resolution_clock::now();
 		//cout << "Starting search with depth " << max_depth << "...\n";
 		searchMax(MAX);
-		//cout << "Search with depth " << max_depth << " returned " << (stop ? "unsuccessfully with " : "successfully with new ") << "best move: " << bestMove.toString() << "\n";
-		/*auto level_finish = chrono::high_resolution_clock::now();
-		if (!stop && max_depth < 10)
-		{
-			times[max_depth].push_back(level_finish - move_start);
-		}*/
 		max_depth++;
-	}
+		lastSearchTime = chrono::high_resolution_clock::now() - searchStart;
+		elapsedTime = chrono::high_resolution_clock::now() - move_start;
+	} while (!stop && elapsedTime + lastSearchTime < chrono::seconds{ TURN_TIME });	// Skips search if doing the search at previous depth would put over time
+
 	board.makeMove(bestMove, player);
 	auto move_finish = chrono::high_resolution_clock::now();
 	time_taken += move_finish - move_start;
@@ -119,12 +121,10 @@ int StudentAI::searchMin(int a)
 {
 	if (depth == max_depth)
 	{
-		/*if (depth <= 3) 
-		{
-			cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
-			cout << "Calculated value = " << (player == 1 ? 1 : -1) * (board.whiteCount - board.blackCount) << "\n";
-		}*/
-		return (player == 1 ? -1 : 1) * heuristic();
+		cout << "Enemy Player = " << (player == 1 ? "Black" : "White") << endl;
+		int Heuristic = (player == 1 ? -1 : 1) * heuristic() - 3;
+		cout << "Calculated value = " << Heuristic << "\n";
+		return Heuristic;
 	}
 	auto move_finish = chrono::high_resolution_clock::now();
 	chrono::duration<double> elapsed = move_finish - move_start;
@@ -138,13 +138,13 @@ int StudentAI::searchMin(int a)
 	vector<vector<Move> > moves = board.getAllPossibleMoves(player);
 	if (player == board.isWin(player == 1 ? 2 : 1))
 	{
-		//cout << "Found loss during searchMin!\n";
+		cout << "Player = " << (player == 1 ? "Black" : "White") << " found loss during searchMin! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
 		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MIN;
 	}
 	else if (board.isWin(player == 1 ? 2 : 1) != 0)
 	{
-		//cout << "Found win during searchMin!\n";
+		cout << "Player = " << (player == 1 ? "Black" : "White") << " found win during searchMin! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
 		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MAX;
 	}
@@ -188,12 +188,10 @@ int StudentAI::searchMax(int b)
 {
 	if (depth == max_depth)
 	{
-		/*if (depth <= 3)
-		{
-			cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
-			cout << "Calculated value = " << (player == 1 ? -1 : 1) * (board.whiteCount - board.blackCount) << "\n";
-		}*/
-		return (player == 1? 1 : -1) * heuristic();
+		cout << "Player = " << (player == 1 ? "Black" : "White") << endl;
+		int Heuristic = (player == 1? 1 : -1) * heuristic() + 3;
+		cout << "Calculated value = " << Heuristic << "\n";
+		return Heuristic;
 	}
 	auto move_finish = chrono::high_resolution_clock::now();
 	chrono::duration<double> elapsed = move_finish - move_start;
@@ -208,13 +206,13 @@ int StudentAI::searchMax(int b)
 
 	if (player == board.isWin(player == 1 ? 2 : 1) || board.isWin(player == 1 ? 2 : 1) == -1)
 	{
-		//cout << "Found win during searchMax!\n"; 
+		cout << "Player = " << (player == 1 ? "Black" : "White") << " found win during searchMax! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
 		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MAX;
 	}
 	else if (board.isWin(player == 1 ? 2 : 1) != 0)
 	{
-		//cout << "Found loss during searchMax!\n";
+		cout << "Player = " << (player == 1 ? "Black" : "White") << " found loss during searchMax! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
 		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MIN;
 	}
@@ -261,23 +259,131 @@ int StudentAI::searchMax(int b)
 	return alpha;
 }
 
+// Scores in favor of Black
 int StudentAI::heuristic()
 {
+	cout << "KINGS: ";
 	int value = 0;
 	for (int i = 0; i < board.row; ++i)
 	{
 		for (int j = 0; j < board.col; ++j)
 		{
-			if (board.board[i][j].color == "b")
-				value += 1;
-			else if (board.board[i][j].color == "w")
-				value -= 1;
+			if (!board.board[i][j].isKing) 
+			{
+				if (board.board[i][j].color == "B")
+					value += (100 + (max(board.row, board.col) + 1) / 2 - min({ board.row - 1 - i, i - 0, board.col - 1 - j, j - 0 }));
+				else if (board.board[i][j].color == "W")
+					value -= (100 + (max(board.row, board.col) + 1) / 2 - min({ board.row - 1 - i, i - 0, board.col - 1 - j, j - 0 }));
+			}
 			else if (board.board[i][j].color == "B")
-				value += 2;
+			{
+				// Check for trapped king
+				vector<Move> moves = board.board[i][j].getPossibleMoves(&board);
+				bool canMove = false;	
+				for (Move move : moves)
+				{
+					if (move.isCapture())
+					{
+						canMove = true;
+						break;
+					}
+
+					bool possibleMove = true;
+
+					if ((move.seq[1].x > 0 && move.seq[1].y > 0 && board.board[move.seq[1].x - 1][move.seq[1].y - 1].toString() == "W")							// NW is King
+						&& ((move.seq[1].x + 1 == i && move.seq[1].y + 1 == j)																					// and (SE is Self
+						|| (move.seq[1].x < board.row - 1 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x + 1][move.seq[1].y + 1].color == ".")))	// or SE is empty)
+						possibleMove = false;
+
+					if ((move.seq[1].x > 0 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x - 1][move.seq[1].y + 1].toString() == "W")				// NE is King
+						&& ((move.seq[1].x + 1 == i && move.seq[1].y - 1 == j)																					// and (SW is Self
+						|| (move.seq[1].x < board.row - 1 && move.seq[1].y > 0 && board.board[move.seq[1].x + 1][move.seq[1].y - 1].color == ".")))				// or SW is empty)
+						possibleMove = false;
+
+					if ((move.seq[1].x < board.row - 1 && move.seq[1].y > 0 && board.board[move.seq[1].x + 1][move.seq[1].y - 1].color == "W")					// SW is enemy
+						&& ((move.seq[1].x - 1 == i && move.seq[1].y + 1 == j)																					// and (NE is Self
+						|| (move.seq[1].x > 0 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x - 1][move.seq[1].y + 1].color == ".")))				// or NE is empty)
+						possibleMove = false;
+
+					if ((move.seq[1].x < board.row - 1 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x + 1][move.seq[1].y + 1].color == "W")		// SE is enemy
+						&& ((move.seq[1].x - 1 == i && move.seq[1].y - 1 == j)																					// and (NW is Self
+						|| (move.seq[1].x > 0 && move.seq[1].y > 0 && board.board[move.seq[1].x - 1][move.seq[1].y - 1].color == ".")))							// or NE is empty)
+						possibleMove = false;
+
+					if (possibleMove)
+					{
+						canMove = true;
+						break;
+					}
+				}
+				if (!canMove) {
+					cout << "b" << endl;
+					board.showBoard();
+				}
+				else
+				{
+					cout << "B" << endl;
+					board.showBoard();
+				}
+				value += (100 + (canMove ? 50 : 0) + (max(board.row, board.col) + 1) / 2 - min({ board.row - 1 - i, i - 0, board.col - 1 - j, j - 0 }));
+			}
 			else if (board.board[i][j].color == "W")
-				value -= 2;
+			{
+				// Check for trapped king
+				vector<Move> moves = board.board[i][j].getPossibleMoves(&board);
+				bool canMove = false;
+				for (Move move : moves)
+				{
+					if (move.isCapture())
+					{
+						canMove = true;
+						break;
+					}
+
+					bool possibleMove = true;
+
+					if ((move.seq[1].x > 0 && move.seq[1].y > 0 && board.board[move.seq[1].x - 1][move.seq[1].y - 1].color == "B")									// NW is King
+						&& ((move.seq[1].x + 1 == i && move.seq[1].y + 1 == j)																						// and (SE is Self
+							|| (move.seq[1].x < board.row - 1 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x + 1][move.seq[1].y + 1].color == ".")))	// or SE is empty)
+						possibleMove = false;
+
+					if ((move.seq[1].x > 0 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x - 1][move.seq[1].y + 1].color == "B")						// NE is King
+						&& ((move.seq[1].x + 1 == i && move.seq[1].y - 1 == j)																						// and (SW is Self
+							|| (move.seq[1].x < board.row - 1 && move.seq[1].y > 0 && board.board[move.seq[1].x + 1][move.seq[1].y - 1].color == ".")))				// or SW is empty)
+						possibleMove = false;
+
+					if ((move.seq[1].x < board.row - 1 && move.seq[1].y > 0 && board.board[move.seq[1].x + 1][move.seq[1].y - 1].toString() == "B")					// SW is enemy
+						&& ((move.seq[1].x - 1 == i && move.seq[1].y + 1 == j)																						// and (NE is Self
+							|| (move.seq[1].x > 0 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x - 1][move.seq[1].y + 1].color == ".")))				// or NE is empty)
+						possibleMove = false;
+
+					if ((move.seq[1].x < board.row - 1 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x + 1][move.seq[1].y + 1].toString() == "B")		// SE is enemy
+						&& ((move.seq[1].x - 1 == i && move.seq[1].y - 1 == j)																						// and (NW is Self
+							|| (move.seq[1].x > 0 && move.seq[1].y > 0 && board.board[move.seq[1].x - 1][move.seq[1].y - 1].color == ".")))							// or NE is empty)
+						possibleMove = false;
+
+					if (possibleMove)
+					{
+						canMove = true;
+						break;
+					}
+				}
+
+				if (!canMove) {
+					cout << "w" << endl;
+					board.showBoard();
+				}
+				else
+				{
+					cout << "W" << endl;
+					board.showBoard();
+				}
+				value -= (100 + (canMove ? 50 : 0) + (max(board.row, board.col) + 1) / 2 - min({ board.row - 1 - i, i - 0, board.col - 1 - j, j - 0 }));
+			}
+
 		}
 	}
+	cout << endl;
 	return value;
 }
 
