@@ -121,9 +121,9 @@ int StudentAI::searchMin(int a)
 {
 	if (depth == max_depth)
 	{
-		cout << "Enemy Player = " << (player == 1 ? "Black" : "White") << endl;
+		//cout << "Enemy Player = " << (player == 1 ? "Black" : "White") << endl;
 		int Heuristic = (player == 1 ? -1 : 1) * heuristic() - 3;
-		cout << "Calculated value = " << Heuristic << "\n";
+		//cout << "Calculated value = " << Heuristic << "\n";
 		return Heuristic;
 	}
 	auto move_finish = chrono::high_resolution_clock::now();
@@ -138,13 +138,13 @@ int StudentAI::searchMin(int a)
 	vector<vector<Move> > moves = board.getAllPossibleMoves(player);
 	if (player == board.isWin(player == 1 ? 2 : 1))
 	{
-		cout << "Player = " << (player == 1 ? "Black" : "White") << " found loss during searchMin! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
+		//cout << "Player = " << (player == 1 ? "Black" : "White") << " found loss during searchMin! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
 		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MIN;
 	}
 	else if (board.isWin(player == 1 ? 2 : 1) != 0)
 	{
-		cout << "Player = " << (player == 1 ? "Black" : "White") << " found win during searchMin! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
+		//cout << "Player = " << (player == 1 ? "Black" : "White") << " found win during searchMin! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
 		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MAX;
 	}
@@ -188,9 +188,9 @@ int StudentAI::searchMax(int b)
 {
 	if (depth == max_depth)
 	{
-		cout << "Player = " << (player == 1 ? "Black" : "White") << endl;
+		//cout << "Player = " << (player == 1 ? "Black" : "White") << endl;
 		int Heuristic = (player == 1? 1 : -1) * heuristic() + 3;
-		cout << "Calculated value = " << Heuristic << "\n";
+		//cout << "Calculated value = " << Heuristic << "\n";
 		return Heuristic;
 	}
 	auto move_finish = chrono::high_resolution_clock::now();
@@ -206,13 +206,13 @@ int StudentAI::searchMax(int b)
 
 	if (player == board.isWin(player == 1 ? 2 : 1) || board.isWin(player == 1 ? 2 : 1) == -1)
 	{
-		cout << "Player = " << (player == 1 ? "Black" : "White") << " found win during searchMax! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
+		//cout << "Player = " << (player == 1 ? "Black" : "White") << " found win during searchMax! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
 		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MAX;
 	}
 	else if (board.isWin(player == 1 ? 2 : 1) != 0)
 	{
-		cout << "Player = " << (player == 1 ? "Black" : "White") << " found loss during searchMax! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
+		//cout << "Player = " << (player == 1 ? "Black" : "White") << " found loss during searchMax! (" << board.isWin(player == 1 ? 2 : 1) << ")\n";
 		//cout << "Player = " << (player == 1 ? "Black" : "White") << "| Black Pieces: " << board.blackCount << " White Pieces: " << board.whiteCount << "\n";
 		return MIN;
 	}
@@ -262,7 +262,7 @@ int StudentAI::searchMax(int b)
 // Scores in favor of Black
 int StudentAI::heuristic()
 {
-	cout << "KINGS: ";
+	//cout << "KINGS: ";
 	int value = 0;
 	for (int i = 0; i < board.row; ++i)
 	{
@@ -316,7 +316,7 @@ int StudentAI::heuristic()
 						break;
 					}
 				}
-				if (!canMove) {
+				/*if (!canMove) {
 					cout << "b" << endl;
 					board.showBoard();
 				}
@@ -324,7 +324,7 @@ int StudentAI::heuristic()
 				{
 					cout << "B" << endl;
 					board.showBoard();
-				}
+				}*/
 				value += (100 + (canMove ? 50 : 0) + (max(board.row, board.col) + 1) / 2 - min(min(board.row - 1 - i, i - 0), min(board.col - 1 - j, j - 0 )));
 			}
 			else if (board.board[i][j].color == "W")
@@ -369,7 +369,7 @@ int StudentAI::heuristic()
 					}
 				}
 
-				if (!canMove) {
+				/*if (!canMove) {
 					cout << "w" << endl;
 					board.showBoard();
 				}
@@ -377,13 +377,13 @@ int StudentAI::heuristic()
 				{
 					cout << "W" << endl;
 					board.showBoard();
-				}
+				}*/
 				value -= (100 + (canMove ? 50 : 0) + (max(board.row, board.col) + 1) / 2 - min(min(board.row - 1 - i, i - 0), min(board.col - 1 - j, j - 0 )));
 			}
 
 		}
 	}
-	cout << endl;
+	/*cout << endl;*/
 	return value;
 }
 
