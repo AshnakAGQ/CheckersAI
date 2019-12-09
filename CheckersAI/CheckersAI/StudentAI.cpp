@@ -271,9 +271,9 @@ int StudentAI::heuristic()
 			if (!board.board[i][j].isKing) 
 			{
 				if (board.board[i][j].color == "B")
-					value += (100 + (max(board.row, board.col) + 1) / 2 - min({ board.row - 1 - i, i - 0, board.col - 1 - j, j - 0 }));
+					value += (100 + (max(board.row, board.col) + 1) / 2 - min(min(board.row - 1 - i, i - 0), min(board.col - 1 - j, j - 0 )));
 				else if (board.board[i][j].color == "W")
-					value -= (100 + (max(board.row, board.col) + 1) / 2 - min({ board.row - 1 - i, i - 0, board.col - 1 - j, j - 0 }));
+					value -= (100 + (max(board.row, board.col) + 1) / 2 - min(min(board.row - 1 - i, i - 0), min(board.col - 1 - j, j - 0 )));
 			}
 			else if (board.board[i][j].color == "B")
 			{
@@ -325,7 +325,7 @@ int StudentAI::heuristic()
 					cout << "B" << endl;
 					board.showBoard();
 				}
-				value += (100 + (canMove ? 50 : 0) + (max(board.row, board.col) + 1) / 2 - min({ board.row - 1 - i, i - 0, board.col - 1 - j, j - 0 }));
+				value += (100 + (canMove ? 50 : 0) + (max(board.row, board.col) + 1) / 2 - min(min(board.row - 1 - i, i - 0), min(board.col - 1 - j, j - 0 )));
 			}
 			else if (board.board[i][j].color == "W")
 			{
@@ -378,7 +378,7 @@ int StudentAI::heuristic()
 					cout << "W" << endl;
 					board.showBoard();
 				}
-				value -= (100 + (canMove ? 50 : 0) + (max(board.row, board.col) + 1) / 2 - min({ board.row - 1 - i, i - 0, board.col - 1 - j, j - 0 }));
+				value -= (100 + (canMove ? 50 : 0) + (max(board.row, board.col) + 1) / 2 - min(min(board.row - 1 - i, i - 0), min(board.col - 1 - j, j - 0 )));
 			}
 
 		}
