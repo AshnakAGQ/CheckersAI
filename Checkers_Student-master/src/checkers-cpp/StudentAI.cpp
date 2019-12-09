@@ -295,17 +295,17 @@ int StudentAI::heuristic()
 						|| (move.seq[1].x < board.row - 1 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x + 1][move.seq[1].y + 1].color == ".")))	// or SE is empty)
 						possibleMove = false;
 
-					if ((move.seq[1].x > 0 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x - 1][move.seq[1].y + 1].toString() == "W")				// NE is King
+					else if ((move.seq[1].x > 0 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x - 1][move.seq[1].y + 1].toString() == "W")		// NE is King
 						&& ((move.seq[1].x + 1 == i && move.seq[1].y - 1 == j)																					// and (SW is Self
 						|| (move.seq[1].x < board.row - 1 && move.seq[1].y > 0 && board.board[move.seq[1].x + 1][move.seq[1].y - 1].color == ".")))				// or SW is empty)
 						possibleMove = false;
 
-					if ((move.seq[1].x < board.row - 1 && move.seq[1].y > 0 && board.board[move.seq[1].x + 1][move.seq[1].y - 1].color == "W")					// SW is enemy
+					else if ((move.seq[1].x < board.row - 1 && move.seq[1].y > 0 && board.board[move.seq[1].x + 1][move.seq[1].y - 1].color == "W")				// SW is enemy
 						&& ((move.seq[1].x - 1 == i && move.seq[1].y + 1 == j)																					// and (NE is Self
 						|| (move.seq[1].x > 0 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x - 1][move.seq[1].y + 1].color == ".")))				// or NE is empty)
 						possibleMove = false;
 
-					if ((move.seq[1].x < board.row - 1 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x + 1][move.seq[1].y + 1].color == "W")		// SE is enemy
+					else if ((move.seq[1].x < board.row - 1 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x + 1][move.seq[1].y + 1].color == "W")	// SE is enemy
 						&& ((move.seq[1].x - 1 == i && move.seq[1].y - 1 == j)																					// and (NW is Self
 						|| (move.seq[1].x > 0 && move.seq[1].y > 0 && board.board[move.seq[1].x - 1][move.seq[1].y - 1].color == ".")))							// or NE is empty)
 						possibleMove = false;
@@ -347,17 +347,17 @@ int StudentAI::heuristic()
 							|| (move.seq[1].x < board.row - 1 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x + 1][move.seq[1].y + 1].color == ".")))	// or SE is empty)
 						possibleMove = false;
 
-					if ((move.seq[1].x > 0 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x - 1][move.seq[1].y + 1].color == "B")						// NE is King
+					else if ((move.seq[1].x > 0 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x - 1][move.seq[1].y + 1].color == "B")					// NE is King
 						&& ((move.seq[1].x + 1 == i && move.seq[1].y - 1 == j)																						// and (SW is Self
 							|| (move.seq[1].x < board.row - 1 && move.seq[1].y > 0 && board.board[move.seq[1].x + 1][move.seq[1].y - 1].color == ".")))				// or SW is empty)
 						possibleMove = false;
 
-					if ((move.seq[1].x < board.row - 1 && move.seq[1].y > 0 && board.board[move.seq[1].x + 1][move.seq[1].y - 1].toString() == "B")					// SW is enemy
+					else if ((move.seq[1].x < board.row - 1 && move.seq[1].y > 0 && board.board[move.seq[1].x + 1][move.seq[1].y - 1].toString() == "B")			// SW is enemy
 						&& ((move.seq[1].x - 1 == i && move.seq[1].y + 1 == j)																						// and (NE is Self
 							|| (move.seq[1].x > 0 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x - 1][move.seq[1].y + 1].color == ".")))				// or NE is empty)
 						possibleMove = false;
 
-					if ((move.seq[1].x < board.row - 1 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x + 1][move.seq[1].y + 1].toString() == "B")		// SE is enemy
+					else if ((move.seq[1].x < board.row - 1 && move.seq[1].y < board.col - 1 && board.board[move.seq[1].x + 1][move.seq[1].y + 1].toString() == "B")// SE is enemy
 						&& ((move.seq[1].x - 1 == i && move.seq[1].y - 1 == j)																						// and (NW is Self
 							|| (move.seq[1].x > 0 && move.seq[1].y > 0 && board.board[move.seq[1].x - 1][move.seq[1].y - 1].color == ".")))							// or NE is empty)
 						possibleMove = false;
